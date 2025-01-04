@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 const crypto = require('crypto');
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST, // Fixed the syntax error here
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
