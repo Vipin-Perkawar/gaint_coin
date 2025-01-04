@@ -107,9 +107,10 @@ module.exports = async (req, res) => {
 
       // Remove the trailing comma and space from the query
       updateSql = updateSql.slice(0, -2);
-      updateSql += ' WHERE email = ?';
 
-      updateParams.push(email);
+      // Use 'id' in the WHERE condition for updating
+      updateSql += ' WHERE id = ?';
+      updateParams.push(id); // Use id here instead of email
       paramTypes.push('s');
 
       pool.execute(updateSql, updateParams, (updateError, updateResults) => {
