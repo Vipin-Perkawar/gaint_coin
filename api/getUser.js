@@ -9,7 +9,11 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306
 });
-
+// Function to format date to YYYY-MM-DD
+const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];  // Returns in "YYYY-MM-DD" format
+};
 // The main function to handle the request
 module.exports = async (req, res) => {
     // Only allow POST requests
