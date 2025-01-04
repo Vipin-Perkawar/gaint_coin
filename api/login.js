@@ -20,14 +20,14 @@ module.exports = async (req, res) => {
 
         // Check if email or password is missing
         if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
+            return res.status(400).json({ status: 'Fail', message: 'Missing required fields' });
         }
 
         // Check if the email exists in the database
         pool.query('SELECT id, password, salt FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Error during the database query:', err); // Improved error logging
-                return res.status(500).json({ success: false, message: 'Database error.' });
+                return res.status(500).json({ status: 'Fail', message: 'Database error.' });
             }
 
             if (results.length > 0) {
@@ -36,15 +36,15 @@ module.exports = async (req, res) => {
 
                 // If the passwords match
                 if (hashedPassword === storedPassword) {
-                    return res.json({ success: true, message: 'Login successful', id });
+                    return res.json({ status: 'Success', message: 'Login successful', id });
                 } else {
-                    return res.status(401).json({ success: false, message: 'Invalid password' });
+                    return res.status(401).json({ status: 'Fail', message: 'Invalid password' });
                 }
             } else {
-                return res.status(404).json({ success: false, message: 'No user found with this email address' });
+                return res.status(404).json({ status: 'Fail', message: 'No user found with this email address' });
             }
         });
     } else {
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ status: 'Fail', message: 'Method Not Allowed' });
     }
 };
