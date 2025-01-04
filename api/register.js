@@ -29,11 +29,11 @@ module.exports = async (req, res) => {
         pool.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Database error:', err);
-                return res.status(500).json({ success: false, message: 'Database error.' });
+                return res.status(500).json({ status:'Fail', message: 'Database error.' });
             }
 
             if (results.length > 0) {
-                return res.status(409).json({ success: false, message: 'Email already exists' });
+                return res.status(409).json({ status:'Fail', message: 'Email already exists' });
             } else {
                 const salt = generateSalt();
                 const hashedPassword = generateHash(password, salt);
@@ -41,10 +41,10 @@ module.exports = async (req, res) => {
                 pool.query('INSERT INTO users (email, password, salt) VALUES (?, ?, ?)', [email, hashedPassword, salt], (err, result) => {
                     if (err) {
                         console.error('Database error:', err);
-                        return res.status(500).json({ success: false, message: 'Database error.' });
+                        return res.status(500).json({ status:'Fail', message: 'Database error.' });
                     }
 
-                    return res.json({ success: true, message: 'Registration successful' });
+                    return res.json({ status:'Success', message: 'Registration successful' });
                 });
             }
         });
