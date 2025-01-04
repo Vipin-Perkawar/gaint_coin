@@ -50,11 +50,14 @@ module.exports = async (req, res) => {
             }
 
             if (results.length > 0) {
+                // Format the dob field to "YYYY-MM-DD" format
+                const user = results[0];
+                user.dob = formatDate(user.dob);
                 // User found, send the response
                 return res.status(200).json({
                     status: 'success',
                     message: 'User found',
-                    data: results[0],
+                    data: user,
                 });
             } else {
                 // No user found
