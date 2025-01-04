@@ -1,11 +1,21 @@
 const mysql = require('mysql2');
 const crypto = require('crypto');
 
+// Create a MySQL connection
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: process.env.DB_HOST, // Ensure this is correct
+    user: process.env.DB_USER, // Ensure this is correct
+    password: process.env.DB_PASSWORD, // Ensure this is correct
+    database: process.env.DB_NAME  // Ensure this is correct
+});
+
+// Check if the connection is successful
+db.connect((err) => {
+    if (err) {
+        console.error('Database connection failed:', err.stack);
+        return;
+    }
+    console.log('Connected to the database');
 });
 
 function generateHash(password, salt) {
@@ -24,11 +34,10 @@ module.exports = async (req, res) => {
         // Check if the email exists in the database
         db.query('SELECT id, password, salt FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
-                console.error('Database error', err);
+                console.error('Error during the database query:', err); // Improved error logging
                 return res.status(500).json({ success: false, message: 'Database error.' });
             }
 
-            // If the email does not exist
             if (results.length > 0) {
                 const { id, password: storedPassword, salt } = results[0];
                 const hashedPassword = generateHash(password, salt);
@@ -44,7 +53,6 @@ module.exports = async (req, res) => {
             }
         });
     } else {
-        // If the method is not POST
         res.status(405).json({ message: 'Method Not Allowed' });
     }
 };
