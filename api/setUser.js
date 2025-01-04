@@ -1,12 +1,12 @@
-// api/setUser.js
 const mysql = require('mysql2');
 
-// Create a connection pool to the database
+// Set up MySQL connection
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,  // Use the environment variable for the host
-  user: process.env.DB_USER,  // Use the environment variable for the user
-  password: process.env.DB_PASSWORD, // Use the environment variable for the password
-  database: process.env.DB_NAME,  // Use the environment variable for the database name
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
 });
 
 // The main function to handle the request
