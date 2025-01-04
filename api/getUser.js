@@ -21,19 +21,19 @@ module.exports = async (req, res) => {
     }
 
     // Get the incoming JSON data
-    const { id, email } = req.body;
+    const { userId, email } = req.body;
 
-    // Validate that at least one identifier (id or email) is provided
-    if (!id && !email) {
+    // Validate that at least one identifier (userId or email) is provided
+    if (!userId && !email) {
         return res.status(400).json({
             status: 'error',
             message: 'User ID or email is required',
         });
     }
 
-    // Prepare the SQL query based on whether the user is looking for an ID or email
+    // Prepare the SQL query based on whether the user is looking for a userId or email
     let sql;
-    if (id) {
+    if (userId) {
         sql = 'SELECT id, name, email, dob, gender, city, state, pincode AS pinCode, address FROM user_details WHERE id = ?';
     } else if (email) {
         sql = 'SELECT id, name, email, dob, gender, city, state, pincode AS pinCode, address FROM user_details WHERE email = ?';
@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
 
     try {
         // Execute the query with the provided parameter
-        pool.execute(sql, [id || email], (error, results) => {
+        pool.execute(sql, [userId || email], (error, results) => {
             if (error) {
                 return res.status(500).json({
                     status: 'error',
