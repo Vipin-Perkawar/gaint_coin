@@ -2,20 +2,11 @@ const mysql = require('mysql2');
 const crypto = require('crypto');
 
 // Create a MySQL connection
-const db = mysql.createConnection({
-    host: process.env.DB_HOST, // Ensure this is correct
-    user: process.env.DB_USER, // Ensure this is correct
-    password: process.env.DB_PASSWORD, // Ensure this is correct
-    database: process.env.DB_NAME  // Ensure this is correct
-});
-
-// Check if the connection is successful
-db.connect((err) => {
-    if (err) {
-        console.error('Database connection failed:', err.stack);
-        return;
-    }
-    console.log('Connected to the database');
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 function generateHash(password, salt) {
@@ -32,7 +23,7 @@ module.exports = async (req, res) => {
         }
 
         // Check if the email exists in the database
-        db.query('SELECT id, password, salt FROM users WHERE email = ?', [email], (err, results) => {
+        pool.query('SELECT id, password, salt FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Error during the database query:', err); // Improved error logging
                 return res.status(500).json({ success: false, message: 'Database error.' });

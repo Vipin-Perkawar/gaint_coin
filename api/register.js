@@ -1,8 +1,8 @@
 const mysql = require('mysql2');
 const crypto = require('crypto');
 
-const db = mysql.createConnection({
-    host: process.env.DB_HOST, // Fixed the syntax error here
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
-        db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+        pool.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({ success: false, message: 'Database error.' });
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
                 const salt = generateSalt();
                 const hashedPassword = generateHash(password, salt);
 
-                db.query('INSERT INTO users (email, password, salt) VALUES (?, ?, ?)', [email, hashedPassword, salt], (err, result) => {
+                pool.query('INSERT INTO users (email, password, salt) VALUES (?, ?, ?)', [email, hashedPassword, salt], (err, result) => {
                     if (err) {
                         console.error('Database error:', err);
                         return res.status(500).json({ success: false, message: 'Database error.' });
