@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
             }
 
             if (result.length > 0) {
-                res.json({ status: "success", lastCheckin: result[0].lastCheckin });
+                res.json({ status: "success", message: "User found.", lastCheckin: result[0].lastCheckin });
             } else {
                 res.json({ status: "error", message: "User not found.", userId });
             }

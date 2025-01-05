@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
         pool.promise().execute(query, [userId])
             .then(([results]) => {
                 if (results.length > 0) {
-                    res.status(200).json({ status: 'success', coins: results[0].coins });
+                    res.status(200).json({ status: 'success', message: 'User found', coins: results[0].coins });
                 } else {
                     res.status(404).json({ status: 'error', message: 'User not found' });
                 }
