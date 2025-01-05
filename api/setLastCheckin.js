@@ -8,23 +8,28 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306
 });
-
+// Function to format date to YYYY-MM-DD
+const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];  // Returns in "YYYY-MM-DD" format
+};
 module.exports = async (req, res) => {
     if (req.method === 'POST') {
         const { userId, dateTime } = req.body;
-
+        const now = formatDate(dateTime);
         // Ensure dateTime is passed and valid
         if (!userId || !dateTime) {
             return res.status(400).json({ status: "error", message: "UserId and dateTime are required." });
         }
-
-        const now = new Date(dateTime);
-
-        // Check if the date is valid
-        if (isNaN(now.getTime())) {
-            return res.status(400).json({ status: "error", message: "Invalid dateTime provided." });
+        // Check if the date is passed
+        if (!dateTime) {
+            return res.status(400).json({ status: "error", message: "DateTime is required." });
         }
-
+        // Check if the UserId is passed
+        if (!userId) {
+            return res.status(400).json({ status: "error", message: "UserId is required." });
+        }
+        
         pool.query('UPDATE users SET lastCheckin = ? WHERE id = ?', [now, userId], (err, result) => {
             if (err) {
                 console.error('Database error:', err);

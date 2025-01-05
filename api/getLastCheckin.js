@@ -8,7 +8,11 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306
 });
-
+// Function to format date to YYYY-MM-DD
+const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];  // Returns in "YYYY-MM-DD" format
+};
 module.exports = async (req, res) => {
     if (req.method === 'POST') {
         const { userId } = req.body; // Expecting userId to be passed in JSON format
@@ -24,7 +28,8 @@ module.exports = async (req, res) => {
             }
 
             if (result.length > 0) {
-                res.json({ status: "success", message: "User found.", lastCheckin: result[0].lastCheckin });
+                const now = formatDate(result[0].lastCheckin);
+                res.json({ status: "success", message: "User found.", lastCheckin: now });
             } else {
                 res.json({ status: "error", message: "User not found.", userId });
             }
