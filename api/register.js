@@ -22,33 +22,47 @@ module.exports = async (req, res) => {
     if (req.method === 'POST') {
         const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        // Check if both email and password are missing
+        if (!email && !password) {
+            return res.status(400).json({ status: "error", message: 'Both email and password are required.' });
         }
 
+        // Check if email is missing
+        if (!email) {
+            return res.status(400).json({ status: "error", message: 'Email is required.' });
+        }
+
+        // Check if password is missing
+        if (!password) {
+            return res.status(400).json({ status: "error", message: 'Password is required.' });
+        }
+
+        // Check if the email already exists in the database
         pool.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Database error:', err);
-                return res.status(500).json({ status:'Fail', message: 'Database error.' });
+                return res.status(500).json({ status: "error", message: 'Database error.' });
             }
 
             if (results.length > 0) {
-                return res.status(409).json({ status:'Fail', message: 'Email already exists' });
+                // If email already exists
+                return res.status(409).json({ status: "error", message: 'Email already exists' });
             } else {
+                // Generate salt and hash the password
                 const salt = generateSalt();
                 const hashedPassword = generateHash(password, salt);
 
                 pool.query('INSERT INTO users (email, password, salt) VALUES (?, ?, ?)', [email, hashedPassword, salt], (err, result) => {
                     if (err) {
                         console.error('Database error:', err);
-                        return res.status(500).json({ status:'Fail', message: 'Database error.' });
+                        return res.status(500).json({ status: "error", message: 'Database error.' });
                     }
 
-                    return res.json({ status:'Success', message: 'Registration successful' });
+                    return res.json({ status: "success", message: 'Registration successful' });
                 });
             }
         });
     } else {
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ status: "error", message: 'Method Not Allowed' });
     }
 };

@@ -24,6 +24,7 @@ module.exports = async (req, res) => {
   // Validate input data
   const { id, email, name, dob, gender, city, state, pinCode, address } = data;
 
+  // Ensure either id or email is provided
   if (!id && !email) {
     return res.status(400).json({
       status: 'error',
@@ -31,6 +32,7 @@ module.exports = async (req, res) => {
     });
   }
 
+  // Ensure all necessary fields are provided for new user
   if ((id || email) && !name || !dob || !gender || !city || !state || !pinCode || !address) {
     return res.status(400).json({
       status: 'error',
@@ -38,17 +40,11 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Check if the user exists based on ID or Email
-  let checkSql;
-  let params;
-
-  if (id) {
-    checkSql = 'SELECT id FROM user_details WHERE id = ?';
-    params = [id];
-  } else if (email) {
-    checkSql = 'SELECT id FROM user_details WHERE email = ?';
-    params = [email];
-  }
+  // Determine the query based on the presence of id or email
+  const checkSql = id 
+    ? 'SELECT id FROM user_details WHERE id = ?' 
+    : 'SELECT id FROM user_details WHERE email = ?';
+  const params = id ? [id] : [email];
 
   pool.execute(checkSql, params, (error, results) => {
     if (error) {
@@ -59,60 +55,26 @@ module.exports = async (req, res) => {
     }
 
     if (results.length > 0) {
-      // If user exists, update the user details
+      // User exists, update the user details
       let updateSql = 'UPDATE user_details SET ';
       let updateParams = [];
-      let paramTypes = [];
-
-      if (name) {
-        updateSql += 'name = ?, ';
-        updateParams.push(name);
-        paramTypes.push('s');
-      }
-      if (email) {
-        updateSql += 'email = ?, ';
-        updateParams.push(email);
-        paramTypes.push('s');
-      }
-      if (dob) {
-        updateSql += 'dob = ?, ';
-        updateParams.push(dob);
-        paramTypes.push('s');
-      }
-      if (gender) {
-        updateSql += 'gender = ?, ';
-        updateParams.push(gender);
-        paramTypes.push('s');
-      }
-      if (city) {
-        updateSql += 'city = ?, ';
-        updateParams.push(city);
-        paramTypes.push('s');
-      }
-      if (state) {
-        updateSql += 'state = ?, ';
-        updateParams.push(state);
-        paramTypes.push('s');
-      }
-      if (pinCode) {
-        updateSql += 'pincode = ?, ';
-        updateParams.push(pinCode);
-        paramTypes.push('s');
-      }
-      if (address) {
-        updateSql += 'address = ?, ';
-        updateParams.push(address);
-        paramTypes.push('s');
-      }
+      
+      // Append the fields that need to be updated dynamically
+      if (name) updateSql += 'name = ?, ', updateParams.push(name);
+      if (email) updateSql += 'email = ?, ', updateParams.push(email);
+      if (dob) updateSql += 'dob = ?, ', updateParams.push(dob);
+      if (gender) updateSql += 'gender = ?, ', updateParams.push(gender);
+      if (city) updateSql += 'city = ?, ', updateParams.push(city);
+      if (state) updateSql += 'state = ?, ', updateParams.push(state);
+      if (pinCode) updateSql += 'pincode = ?, ', updateParams.push(pinCode);
+      if (address) updateSql += 'address = ?, ', updateParams.push(address);
 
       // Remove the trailing comma and space from the query
       updateSql = updateSql.slice(0, -2);
-
-      // Use 'id' in the WHERE condition for updating
       updateSql += ' WHERE id = ?';
-      updateParams.push(id); // Use id here instead of email
-      paramTypes.push('s');
+      updateParams.push(id);
 
+      // Execute the update query
       pool.execute(updateSql, updateParams, (updateError, updateResults) => {
         if (updateError) {
           return res.status(500).json({
@@ -127,9 +89,9 @@ module.exports = async (req, res) => {
         });
       });
     } else {
-      // If user does not exist, insert the new user
+      // User does not exist, insert the new user
       const insertSql = 'INSERT INTO user_details (name, email, dob, gender, city, state, pincode, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-
+      
       pool.execute(insertSql, [name, email, dob, gender, city, state, pinCode, address], (insertError, insertResults) => {
         if (insertError) {
           return res.status(500).json({

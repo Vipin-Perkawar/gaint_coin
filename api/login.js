@@ -18,16 +18,26 @@ module.exports = async (req, res) => {
     if (req.method === 'POST') {
         const { email, password } = req.body;
 
-        // Check if email or password is missing
-        if (!email || !password) {
-            return res.status(400).json({ status: 'Fail', message: 'Missing required fields' });
+        // Check if email and password are both missing
+        if (!email && !password) {
+            return res.status(400).json({ status: "error", message: 'Both email and password are required.' });
+        }
+
+        // Check if email is missing
+        if (!email) {
+            return res.status(400).json({ status: "error", message: 'Email is required.' });
+        }
+
+        // Check if password is missing
+        if (!password) {
+            return res.status(400).json({ status: "error", message: 'Password is required.' });
         }
 
         // Check if the email exists in the database
         pool.query('SELECT id, password, salt FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('Error during the database query:', err); // Improved error logging
-                return res.status(500).json({ status: 'Fail', message: 'Database error.' });
+                return res.status(500).json({ status: "error", message: 'Database error.' });
             }
 
             if (results.length > 0) {
@@ -36,15 +46,15 @@ module.exports = async (req, res) => {
 
                 // If the passwords match
                 if (hashedPassword === storedPassword) {
-                    return res.json({ status: 'Success', message: 'Login successful', id });
+                    return res.json({ status: "success", message: 'Login successful', id });
                 } else {
-                    return res.status(401).json({ status: 'Fail', message: 'Invalid password' });
+                    return res.status(401).json({ status: "error", message: 'Invalid password' });
                 }
             } else {
-                return res.status(404).json({ status: 'Fail', message: 'No user found with this email address' });
+                return res.status(404).json({ status: "error", message: 'No user found with this email address' });
             }
         });
     } else {
-        res.status(405).json({ status: 'Fail', message: 'Method Not Allowed' });
+        res.status(405).json({ status: "error", message: 'Method Not Allowed' });
     }
 };
